@@ -14,7 +14,7 @@ url = URL.create(
 )
 
 engine = create_engine(url)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 session = Session()
 
 Base = declarative_base()
@@ -29,10 +29,9 @@ class Lecturer(Base):
     full_name = Column(String)
     academic_degree = Column(String)
 
-    lesson = relationship("Lesson", back_populates="lecturer")
+    _lesson = relationship("Lesson", backref="lecturer")
 
 
-# TODO check types using pydantic
 class Lesson(Base):
     __tablename__ = "lesson"
 
@@ -53,7 +52,7 @@ class Subject(Base):
     hours = Column(Integer)
     required = Column(Boolean, default=True)
 
-    lesson = relationship("Lesson", back_populates="subject")
+    _lesson = relationship("Lesson", backref="subject")
 
 
 Base.metadata.create_all(engine)
