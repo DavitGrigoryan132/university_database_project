@@ -1,6 +1,7 @@
 from typing import Optional
 from datetime import date, time
 from pydantic import BaseModel, PositiveInt, constr
+from models import Lecturer, Lesson, Subject
 
 
 class LecturerBase(BaseModel):
@@ -14,7 +15,7 @@ class LecturerCreate(LecturerBase):
     pass
 
 
-class Lecturer(LecturerBase):
+class LecturerSchema(LecturerBase):
     id: PositiveInt
 
     class Config:
@@ -35,7 +36,7 @@ class LessonCreate(LessonBase):
     pass
 
 
-class Lesson(LessonBase):
+class LessonSchema(LessonBase):
     class Config:
         orm_mode = True
 
@@ -51,7 +52,7 @@ class SubjectCreate(SubjectBase):
     pass
 
 
-class Subject(SubjectBase):
+class SubjectSchema(SubjectBase):
     class Config:
         orm_mode = True
 

@@ -20,6 +20,15 @@ session = Session()
 Base = declarative_base()
 
 
+# Dependency to get the SQLAlchemy session
+def get_db():
+    db = Session(bind=engine)
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 class Lecturer(Base):
     __tablename__ = "lecturer"
 
