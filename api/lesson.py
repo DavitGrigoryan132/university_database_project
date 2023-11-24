@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
-from models import Lesson, get_db
-from schema import LessonCreate, LessonSchema, create_lesson
+from models import Lesson, Lecturer, get_db
+from schema import LessonCreate, LessonSchema, LessonWithLecturerSchema, create_lesson
 
 
 router = APIRouter()
@@ -51,3 +52,27 @@ def delete_lesson(date: str, time: str, db: Session = Depends(get_db)):
 def list_lessons(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     lessons = db.query(Lesson).offset(skip).limit(limit).all()
     return lessons
+
+
+# List all lessons with associated lecturer information
+@router.get("/lessons-with-lecturers/", response_model=list[LessonWithLecturerSchema])
+def list_lessons_with_lecturers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    lessons = (
+        db.query(Lesson, Lecturer.full_name)
+        .join(Lecturer, Lesson.lecturer_id == Lecturer.id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return [{"lesson": lesson, "lecturer_full_name": lecturer_full_name} for lesson, lecturer_full_name in lessons]
+
+
+# Count the number of lessons for each subject
+@router.get("/lesson-count-by-subject/", response_model=dict)
+def lesson_count_by_subject(db: Session = Depends(get_db)):
+    result = (
+        db.query(Lesson.subject_name, func.count(Lesson.subject_name))
+        .group_by(Lesson.subject_name)
+        .all()
+    )
+    return dict(result)

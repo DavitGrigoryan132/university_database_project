@@ -57,6 +57,14 @@ class SubjectSchema(SubjectBase):
         orm_mode = True
 
 
+class LessonWithLecturerSchema(BaseModel):
+    lesson: LessonSchema
+    lecturer_full_name: str
+
+    class Config:
+        orm_mode = True
+
+
 # Function to add a new lesson to the database
 def create_lesson(db_session, lesson: LessonCreate):
     db_lesson = Lesson(**lesson.model_dump(mode="python"))
