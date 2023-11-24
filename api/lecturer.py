@@ -11,7 +11,6 @@ router = APIRouter()
 # Create Lecturer
 @router.post("/lecturers/", response_model=LecturerSchema)
 def post_lecturer(lecturer: LecturerCreate, db: Session = Depends(get_db)):
-    print(lecturer)
     return create_lecturer(db, lecturer)
 
 
