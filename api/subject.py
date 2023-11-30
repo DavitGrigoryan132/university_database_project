@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from models import Subject, get_db
 from schema import SubjectCreate, SubjectSchema, create_subject
@@ -73,6 +74,23 @@ def list_subjects_sorted(skip: int = 0, limit: int = 10, db: Session = Depends(g
         .order_by(Subject.name)
         .offset(skip)
         .limit(limit)
+        .all()
+    )
+    return subjects
+
+
+# Full-text search with regular expressions on the JSON field
+@router.get("/subjects-search-regex/", response_model=list[SubjectSchema])
+def search_subjects_regex(regex: str = Query(..., title="Regular Expression"), db: Session = Depends(get_db)):
+    # Using PostgreSQL ~* operator for case-insensitive regex search
+
+    subjects = (
+        db.query(Subject)
+        .filter(
+            func.to_tsvector('english', Subject.name).op("@@")(
+                func.plainto_tsquery('english', regex)
+            )
+        )
         .all()
     )
     return subjects
