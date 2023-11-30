@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, \
-    String, Date, Time, Boolean, ForeignKey
+    String, Date, Time, Boolean, ForeignKey, Index
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
@@ -60,8 +61,11 @@ class Subject(Base):
     exam_type = Column(String)
     hours = Column(Integer)
     required = Column(Boolean, default=True)
+    data = Column(JSONB)
 
     _lesson = relationship("Lesson", backref="subject")
 
 
+# Create the pg_trgm+GIN index
+Index("idx_subject_data_trgm_gin", Subject.data, postgresql_using="gin", postgresql_ops={"data": "gin_trgm_ops"})
 Base.metadata.create_all(engine)
